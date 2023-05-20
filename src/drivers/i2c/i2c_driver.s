@@ -50,7 +50,6 @@ NVIC_EnableIRQ:
 	nop
 	mov	sp, r7
 	add	sp, sp, #8
-	@ sp needed
 	pop	{r7, pc}
 .L3:
 	.align	2
@@ -267,7 +266,6 @@ I2CStart_RETURN:
 	movs	r0, r3
 	mov	sp, r7
 	add	sp, sp, #8
-	@ sp needed
 	pop	{r7, pc}
 	.size	I2CStart, .-I2CStart
 
@@ -282,22 +280,21 @@ I2CStop:
 	add	r7, sp, #0
 	ldr		r1, =LPC_I2C_BASE
 	ldr		r2, =I2C_OFFSET_CONSET
-	movs	r3, #I2CONSET_STO
+	movs	r3, #I2C_I2CONSET_STO
 	str	r3, [r1, r2]
 	ldr		r2, =I2C_OFFSET_CONCLR
-	movs	r3, #I2CONCLR_SIC
+	movs	r3, #I2C_I2CONCLR_SIC
 	str	r3, [r1, r2]
 	nop
 WAIT_LOOP:
 	ldr		r2, =I2C_OFFSET_CONSET
 	ldr	r3, [r1, r2]
-	movs	r2, #I2CONSET_STO
+	movs	r2, #I2C_I2CONSET_STO
 	ands	r3, r2
 	bne	WAIT_LOOP
 	movs	r3, #1
 	movs	r0, r3
 	mov	sp, r7
-	@ sp needed
 	pop	{r7, pc}
 	.size	I2CStop, .-I2CStop
 
@@ -345,7 +342,7 @@ I2CInit:
 	orrs	r2, r1
 	str	r2, [r3]
 	ldr		r3, =LPC_I2C_BASE+I2C_OFFSET_CONCLR
-	movs	r2, #(I2CONCLR_AAC | I2CONCLR_SIC | I2CONCLR_STAC | I2CONCLR_I2ENC)
+	movs	r2, #(I2C_I2CONCLR_AAC | I2C_I2CONCLR_SIC | I2C_I2CONCLR_STAC | I2C_I2CONCLR_I2ENC)
 	str	r2, [r3]
 	ldr		r3, =LPC_I2C_BASE+I2C_OFFSET_SCLL
 	ldr r2, =I2SCLL_SCLL
@@ -363,12 +360,11 @@ I2CInit:
 	movs	r0, #15
 	bl	NVIC_EnableIRQ
 	ldr		r3, =LPC_I2C_BASE+I2C_OFFSET_CONSET
-	movs	r2, #I2CONSET_I2EN
+	movs	r2, #I2C_I2CONSET_I2EN
 	str	r2, [r3]
 	movs	r3, #1
 	movs	r0, r3
 	mov	sp, r7
 	add	sp, sp, #8
-	@ sp needed
 	pop	{r7, pc}
 	.size	I2CInit, .-I2CInit

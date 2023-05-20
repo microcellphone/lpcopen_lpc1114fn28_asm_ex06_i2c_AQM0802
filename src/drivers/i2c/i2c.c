@@ -8,26 +8,13 @@
  *   2009.12.07  ver 1.00    Preliminary version, first Release
  *
 *****************************************************************************/
-#include "chip.h"			/* LPC134x Peripheral Registers */
+#include "chip.h"
 #include "i2c.h"
 
-extern void I2C_IRQHandler_ISR( void );
-extern uint32_t I2CInit( uint32_t I2cMode );
 extern uint32_t I2CStart( void );
 extern uint32_t I2CStop( void );
-extern uint32_t I2CEngine( void );
 
 extern uint32_t I2CMasterState;
-extern uint32_t I2CSlaveState;
-
-extern uint32_t I2CMode;
-
-extern uint8_t I2CMasterBuffer[BUFSIZE];
-extern uint8_t I2CSlaveBuffer[BUFSIZE];
-extern uint32_t I2CCount;
-extern uint32_t I2CReadLength;
-extern uint32_t I2CWriteLength;
-
 extern uint32_t RdIndex;
 extern uint32_t WrIndex;
 

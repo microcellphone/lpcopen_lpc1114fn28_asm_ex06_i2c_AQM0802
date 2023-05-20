@@ -1,22 +1,13 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include "st7032.h"
 #include "aqm0802.h"
-#include "chip.h"
-#include <i2c.h>
+#include "my_delay.h"
+#include "i2c.h"
 
 extern void ST7032_i2c_cmd(uint8_t cmd);
 extern void ST7032_i2c_data(uint8_t data);
 extern uint32_t I2C_Config_Request( uint32_t I2cMode, uint32_t I2cAddress );
 extern uint32_t I2CInit( uint32_t I2cMode );
-extern uint32_t I2CEngine( void );
-extern void Delay (unsigned long tick);
-
-#define AQM0802_ADDR	0x7c
-#define ST7032_OSC_FREQ	0x04
-#define ST7032_AMP_RATIO	0x02
-
 
 int AQM0802_cleardisplay(void)
 {
@@ -73,8 +64,6 @@ int AQM0802_init( int contrast )
 
 void AQM0802_Config_Request(void)
 {
-  // Initialize I2C
-//  if (I2CInit((uint32_t) I2CMASTER) == FALSE ) {
 	if (I2C_Config_Request((uint32_t) I2CMASTER, AQM0802_ADDR) == FALSE ) {
 		  while (1); // Error Trap
 	}

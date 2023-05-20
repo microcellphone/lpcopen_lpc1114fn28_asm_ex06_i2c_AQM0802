@@ -3,10 +3,10 @@
 
 #include "chip.h"
 
-//=============
-// Prototypes
-//=============
-//
+#define AQM0802_ADDR			0x7c
+#define ST7032_OSC_FREQ		0x04
+#define ST7032_AMP_RATIO		0x02
+
 void AQM0802_Config_Request(void);
 int AQM0802_cleardisplay(void);
 int AQM0802_setcursor(int , int);

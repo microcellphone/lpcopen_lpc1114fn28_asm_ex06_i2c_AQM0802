@@ -1,5 +1,5 @@
 #include "chip.h"
-#include <i2c.h>
+#include "i2c.h"
 #include "st7032.h"
 
 extern uint32_t I2CEngine( void );

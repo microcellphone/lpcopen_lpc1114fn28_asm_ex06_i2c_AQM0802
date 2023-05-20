@@ -16,9 +16,9 @@ Here are some common GCC directives for ARM Cortex-M0 assembly:
 Note that this is not an exhaustive list, and different versions of GCC may support additional or different directives.
 */
 #include "i2c_11xx_asm.h"
-#include "i2c.h"
 #include "iocon_11xx_asm.h"
 #include "gpio_11xx_2_asm.h"
+#include "i2c.h"
 
 
 //; Define constants for I2C states
@@ -49,15 +49,12 @@ Note that this is not an exhaustive list, and different versions of GCC may supp
 
 .extern  I2CMasterState
 .extern  I2CSlaveState
-
 .extern  I2CMode
-
 .extern  I2CMasterBuffer
 .extern  I2CSlaveBuffer
 .extern  I2CCount
 .extern  I2CReadLength
 .extern  I2CWriteLength
-
 .extern  RdIndex
 .extern  WrIndex
 
@@ -127,7 +124,6 @@ I2C_IRQHandler_RETURN:
 	nop
 	mov	sp, r7
 	add	sp, sp, #8
-	@ sp needed
 	pop	{r7, pc}
 	.size	I2C_IRQHandler, .-I2C_IRQHandler
 
@@ -154,8 +150,8 @@ JUMP_0x08:
 	str	r2, [r3, #I2C_OFFSET_DAT]
 //	LPC_I2C->CONCLR = (I2CONCLR_SIC | I2CONCLR_STAC);
 	ldr		r3, =LPC_I2C_BASE
-	movs r2, #I2CONCLR_SIC
-	movs r4, #I2CONCLR_STAC
+	movs r2, #I2C_I2CONCLR_SIC
+	movs r4, #I2C_I2CONCLR_STAC
 	orrs r2, r2, r4
 	str	r2, [r3, #I2C_OFFSET_CONCLR]
 //	I2CMasterState  = I2C_STARTED;
@@ -188,8 +184,8 @@ JUMP_0x10: //.L10:
 	str	r2, [r3, #I2C_OFFSET_DAT]
 //	LPC_I2C->CONCLR = (I2CONCLR_SIC | I2CONCLR_STAC);
 	ldr		r3, =LPC_I2C_BASE
-	movs r4, #I2CONCLR_SIC
-	movs r5, #I2CONCLR_STAC
+	movs r4, #I2C_I2CONCLR_SIC
+	movs r5, #I2C_I2CONCLR_STAC
 	orrs r5, r5, r4
 	movs	r2, r5
 	str	r2, [r3, #I2C_OFFSET_CONCLR]
@@ -238,7 +234,7 @@ JUMP_0x18: //.L9:
 	.type	COMMON_CONCLR, %function
 COMMON_CONCLR:
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONCLR_SIC
+	movs	r2, #I2C_I2CONCLR_SIC
 	str	r2, [r3, #I2C_OFFSET_CONCLR]
 	b	I2C_IRQHandler_RETURN
 //	bx lr
@@ -299,7 +295,7 @@ JUMP_0x28_0x30_CONTINUE:
 	beq	JUMP_0x28_0x30_CONTINUE_1
 //	  	LPC_I2C->CONSET = I2CONSET_STA;	// Set Repeated-start flag
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONSET_STA  //0x20
+	movs	r2, #I2C_I2CONSET_STA  //0x20
 	str	r2, [r3, #I2C_OFFSET_CONSET]
 //	  	I2CMasterState  = I2C_REPEATED_START;
 	ldr	r3, =I2CMasterState
@@ -313,12 +309,12 @@ JUMP_0x28_0x30_CONTINUE_1:
 	str	r2, [r3]
 //	  	LPC_I2C->CONSET = I2CONSET_STO;      // Set Stop flag
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONSET_STO
+	movs	r2, #I2C_I2CONSET_STO
 	str	r2, [r3, #I2C_OFFSET_CONSET]
 JUMP_0x28_0x30_CONTINUE_2:
 //	LPC_I2C->CONCLR = I2CONCLR_SIC;
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONCLR_SIC
+	movs	r2, #I2C_I2CONCLR_SIC
 	str	r2, [r3, #I2C_OFFSET_CONCLR]
 	b	I2C_IRQHandler_RETURN
 //	bx lr
@@ -338,18 +334,18 @@ JUMP_0x40:
 	bne	JUMP_0x40_CONTINUE_1
 //	  LPC_I2C->CONCLR = I2CONCLR_AAC;	// assert NACK after data is received
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONCLR_AAC
+	movs	r2, #I2C_I2CONCLR_AAC
 	str	r2, [r3, #I2C_OFFSET_CONCLR]
 	b	JUMP_0x40_CONTINUE_2
 JUMP_0x40_CONTINUE_1:
 //	  LPC_I2C->CONSET = I2CONSET_AA;	// assert ACK after data is received
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONSET_AA
+	movs	r2, #I2C_I2CONSET_AA
 	str	r2, [r3, #I2C_OFFSET_CONSET]
 JUMP_0x40_CONTINUE_2:
 //	LPC_I2C->CONCLR = I2CONCLR_SIC;
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONCLR_SIC
+	movs	r2, #I2C_I2CONCLR_SIC
 	str	r2, [r3, #I2C_OFFSET_CONCLR]
 	b	I2C_IRQHandler_RETURN
 //	bx lr
@@ -386,7 +382,7 @@ JUMP_0x50: //.L4:
 	str	r2, [r3]
 //	  LPC_I2C->CONSET = I2CONSET_AA;	// assert ACK after data is received
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONSET_AA
+	movs	r2, #I2C_I2CONSET_AA
 	str	r2, [r3, #I2C_OFFSET_CONSET]
 	b	JUMP_0x50_CONTINUE_2
 JUMP_0x50_CONTINUE_1:
@@ -396,12 +392,12 @@ JUMP_0x50_CONTINUE_1:
 	str	r2, [r3]
 //	  LPC_I2C->CONCLR = I2CONCLR_AAC;	// assert NACK on last byte
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONCLR_AAC
+	movs	r2, #I2C_I2CONCLR_AAC
 	str	r2, [r3, #I2C_OFFSET_CONCLR]
 JUMP_0x50_CONTINUE_2:
 //	LPC_I2C->CONCLR = I2CONCLR_SIC;
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONCLR_SIC
+	movs	r2, #I2C_I2CONCLR_SIC
 	str	r2, [r3, #I2C_OFFSET_CONCLR]
 	b	I2C_IRQHandler_RETURN
 //	bx lr
@@ -431,11 +427,11 @@ JUMP_0x58:
 	str	r2, [r3]
 //	LPC_I2C->CONSET = I2CONSET_STO;	// Set Stop flag
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONSET_STO
+	movs	r2, #I2C_I2CONSET_STO
 	str	r2, [r3]
 //	LPC_I2C->CONCLR = I2CONCLR_SIC;	// Clear SI flag
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONCLR_SIC
+	movs	r2, #I2C_I2CONCLR_SIC
 	str	r2, [r3, #I2C_OFFSET_CONCLR]
 	b	I2C_IRQHandler_RETURN
 //	bx lr
@@ -467,7 +463,7 @@ JUMP_0x58:
 JUMP_0x48:  //.L5:
 //	LPC_I2C->CONCLR = I2CONCLR_SIC;
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONCLR_SIC
+	movs	r2, #I2C_I2CONCLR_SIC
 	str	r2, [r3, #I2C_OFFSET_CONCLR]
 //	I2CMasterState = DATA_NACK;
 	ldr	r3, =I2CMasterState
@@ -503,7 +499,7 @@ default_function:
 	.type	COMMON_COMPLETION, %function
 COMMON_COMPLETION: //.L3:
 	ldr		r3, =LPC_I2C_BASE
-	movs	r2, #I2CONCLR_SIC
+	movs	r2, #I2C_I2CONCLR_SIC
 	str	r2, [r3, #I2C_OFFSET_CONCLR]
 //	nop
 	b I2C_IRQHandler_RETURN
