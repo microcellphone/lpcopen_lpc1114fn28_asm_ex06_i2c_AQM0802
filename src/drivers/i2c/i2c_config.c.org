@@ -1,0 +1,65 @@
+/*****************************************************************************
+ *   i2c.c:  I2C C file for NXP LPC11xx Family Microprocessors
+ *
+ *   Copyright(C) 2008, NXP Semiconductor
+ *   All rights reserved.
+ *
+ *   History
+ *   2009.12.07  ver 1.00    Preliminary version, first Release
+ *
+*****************************************************************************/
+#include "chip.h"			/* LPC134x Peripheral Registers */
+#include "i2c.h"
+
+/* 
+From device to device, the I2C communication protocol may vary, 
+in the example below, the protocol uses repeated start to read data from or 
+write to the device:
+For master read: the sequence is: STA,Addr(W),offset,RE-STA,Addr(r),data...STO 
+for master write: the sequence is: STA,Addr(W),offset,RE-STA,Addr(w),data...STO
+Thus, in state 8, the address is always WRITE. in state 10, the address could 
+be READ or WRITE depending on the I2C command.
+*/   
+
+uint32_t I2C_Config_Request( uint32_t I2cMode, uint32_t I2cAddress )
+{
+  /* It seems to be bit0 is for I2C, different from
+  UM. To be retested along with SSP reset. SSP and I2C
+  reset are overlapped, a known bug, for now, both SSP
+  and I2C use bit 0 for reset enable. Once the problem
+  is fixed, change to "#if 1". */
+#if 1
+  LPC_SYSCTL->PRESETCTRL |= (0x1<<1);
+#else
+  LPC_SYSCTL->PRESETCTRL |= (0x1<<0);
+#endif
+  LPC_SYSCTL->SYSAHBCLKCTRL |= (1<<5);
+  LPC_IOCON->REG[IOCON_PIO0_4] &= ~0x3F;	/*  I2C I/O config */
+  LPC_IOCON->REG[IOCON_PIO0_4] |= 0x01;	/* I2C SCL */
+  LPC_IOCON->REG[IOCON_PIO0_5] &= ~0x3F;
+  LPC_IOCON->REG[IOCON_PIO0_5] |= 0x01;	/* I2C SDA */
+
+  /*--- Clear flags ---*/
+  LPC_I2C->CONCLR = I2CONCLR_AAC | I2CONCLR_SIC | I2CONCLR_STAC | I2CONCLR_I2ENC;
+
+  /*--- Reset registers ---*/
+#if FAST_MODE_PLUS
+  LPC_IOCON->PIO0_4 |= (0x1<<9);
+  LPC_IOCON->PIO0_5 |= (0x1<<9);
+  LPC_I2C->SCLL   = I2SCLL_HS_SCLL;
+  LPC_I2C->SCLH   = I2SCLH_HS_SCLH;
+#else
+  LPC_I2C->SCLL   = I2SCLL_SCLL;
+  LPC_I2C->SCLH   = I2SCLH_SCLH;
+#endif
+
+  if ( I2cMode == I2CSLAVE ) {
+  	LPC_I2C->ADR0 = I2cAddress;
+  }
+
+  /* Enable the I2C Interrupt */
+  NVIC_EnableIRQ(I2C0_IRQn);
+
+  LPC_I2C->CONSET = I2CONSET_I2EN;
+  return( TRUE );
+}
